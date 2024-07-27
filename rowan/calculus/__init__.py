@@ -85,3 +85,45 @@ def integrate(q, v, dt):
     _validate_unit(q)
 
     return multiply(exp(_promote_vec(v * dt / 2)), q)
+
+def integrate_local(q, v, dt):
+    q = np.asarray(q)
+    v = np.asarray(v)
+    dt = np.asarray(dt)
+
+    _validate_unit(q)
+
+    return multiply(q, exp(_promote_vec(v * dt / 2)))
+
+def integrate_local_1st_order(q, v, dt):
+    q = np.asarray(q)
+    v = np.asarray(v)
+    dt = np.asarray(dt)
+
+    _validate_unit(q)
+
+    return multiply(q, np.array([1, v[0]*dt/2, v[1]*dt/2, v[2]*dt/2]))
+
+def integrate_local_rk4(q, v, dt):
+    q = np.asarray(q)
+    v = np.asarray(v)
+    dt = np.asarray(dt)
+
+    _validate_unit(q)
+
+    def f(q, v):
+        return 0.5 * multiply(q, np.array([0, v[0], v[1], v[2]]))
+    
+    k1 = f(q, v)
+    q1 = q + k1*dt/2
+    q1 /= np.linalg.norm(q1)
+    k2 = f(q1, v)
+    q2 = q + k2*dt/2
+    q2 /= np.linalg.norm(q2)
+    k3 = f(q2, v)
+    q3 = q + k3*dt
+    q3 /= np.linalg.norm(q3)
+    k4 = f(q3, v)
+    k = (k1 + 2*k2 + 2*k3 + k4)/6
+    q += k*dt
+    return q/np.linalg.norm(q)
